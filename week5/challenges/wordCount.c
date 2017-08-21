@@ -27,12 +27,12 @@ int main (int argc, char *argv[]) {
     arr[1] = getchar();
 
     while ((c = getchar()) != EOF) {
-        if (IsLegalCharacter(arr[0]) && IsLegalCharacter(arr[1])) {
+        if (IsLegalCharacter(arr[0]) && !IsLegalCharacter(arr[1])) {
             wordCount++;
-        }
+        } 
 
-        arr[0] = c;
-        arr[1] = getchar();
+        arr[0] = arr[1];
+        arr[1] = c;
     }
 
     printf("%d words\n", wordCount);
