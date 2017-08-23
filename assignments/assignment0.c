@@ -17,6 +17,23 @@
 #define TRUE 1
 #define FALSE !TRUE
 
+
+// ===========      StandardTimeZoneStartDates      ===========
+#define AUS_START_DAY 1
+#define AUS_START_MONTH 4
+
+#define NZ_START_DAY 1
+#define NZ_START_MONTH 4
+#define NZ_START_HOUR 1400
+
+// ===========      StandardTimeZoneEndDates      ===========
+#define AUS_END_DAY 30
+#define AUS_END_MONTH 9
+
+#define NZ_END_DAY 23
+#define NZ_END_MONTH 9
+#define NZ_END_HOUR 1400
+
 // ===========      Cities      ===========
 
 // Australia
@@ -144,47 +161,45 @@ int main(int argc, char *argv[])
     assert(getLocalTime(CITY_BROKEN_HILL, 17, 7, 117) == 1047);
 
     // Add your own tests here
+    printf("All tests passed\n");
 
     return EXIT_SUCCESS;
 }
 
-int isDaylightSavings(int daylightStartDay, int daylightStartMonth, int daylightStartHour, int currentHour, int currentDay, int currentMonth, int daylightEndDay, int daylightEndMonth, int daylightEndHour)
-{
-    int isDaylightSavings;
-
-    if (currentMonth > daylightStartMonth) {
-        isDaylightSavings = TRUE;
-    } else if  (currentMonth == daylightStartMonth && currentDay == daylightStartDay && currentHour >= daylightStartHour) {
-        isDaylightSavings = TRUE;
-    } else if (currentMonth == daylightStartDay && currentDay > daylightStartDay) {
-        isDaylightSavings = TRUE;
-    } else if (currentMonth < daylightEndMonth) {
-        isDaylightSavings = TRUE;
-    } else if (currentMonth == daylightEndMonth && currentDay < daylightEndDay) {
-        isDaylightSavings = TRUE;
-    } else if (currentMonth == daylightEndMonth && currentDay == daylightEndDay && currentHour <= daylightEndHour) {
-        isDaylightSavings = TRUE;
+//Checks if the second supplied date occurs after the first date.
+int dateChecker(int firstDay, int firstMonth, int firstHour, int secondDay, int secondMonth, int secondHour) {
+    int isSecondAfterFirst;
+    if (secondMonth > firstMonth) {
+        isSecondAfterFirst = TRUE;
+    } else if  (secondMonth == firstMonth && secondDay == firstDay && secondHour > firstHour) {
+        isSecondAfterFirst = TRUE;
+    } else if (secondMonth == firstMonth && secondDay > firstDay) {
+        isSecondAfterFirst = TRUE;
     } else {
-        isDaylightSavings = FALSE;
+        isSecondAfterFirst = FALSE;
     }
 
-    return isDaylightSavings;
+    return isSecondAfterFirst;
 }
 
-int getAustralianTimezone(int city, int currentDay, int currentMonth, int currentHour)
+//Returns the correct aus timezone based on provided city, and date
+int getAusTime(int city, int day, int month, int hour)
 {
     int timezone;
-    if (city == CITY_SYDNEY  || city == CITY_CANBERRA || city == CITY_MELBOURNE || city == CITY_HOBART) {
-        if (isDaylightSavings(30, 9, 1600, currentHour, currentDay, currentMonth, 1, 4, 1600)) {
-            timezone = TIMEZONE_AEDT;
+    if (city == CITY_SYDNEY || city == CITY_CANBERRA || 
+            city == CITY_MELBOURNE || city == CITY_HOBART) {
+        if (dateChecker(1, 4, 1600, day, month, hour) && 
+            dateChecker(day, month, hour, 30, 9, 1600)) {
+                    timezone = TIMEZONE_AEST;
         } else {
-            timezone = TIMEZONE_AEST;
+            timezone = TIMEZONE_AEDT;
         }
     } else if (city == CITY_ADELAIDE || city == CITY_BROKEN_HILL) {
-        if (isDaylightSavings(30, 9, 1630, currentHour, currentDay, currentMonth,1, 4, 1630)) {
-            timezone = TIMEZONE_ACDT;
+        if (dateChecker(1,4,1630, day, month, hour) && 
+            dateChecker(day, month, hour, 30,9,1630)) {
+                timezone = TIMEZONE_ACST;
         } else {
-            timezone = TIMEZONE_ACST;
+                timezone = TIMEZONE_ACDT;
         }
     } else if (city == CITY_DARWIN) {
         timezone = TIMEZONE_ACST;
@@ -195,10 +210,11 @@ int getAustralianTimezone(int city, int currentDay, int currentMonth, int curren
     } else if (city == CITY_BRISBANE) {
         timezone = TIMEZONE_AEST;
     } else if (city == CITY_LORD_HOWE_IS) {
-        if (isDaylightSavings(30, 9, 1530, currentHour, currentDay, currentMonth, 1, 4, 1530)) {
-            timezone= TIMEZONE_LHDR;
-        } else {
+         if (dateChecker(1,4,1530, day, month, hour) && 
+            dateChecker(day, month, hour, 30,9,1530)) {
             timezone =  TIMEZONE_LHST;
+        } else {
+            timezone = TIMEZONE_LHDR;   
         }
     }
 
@@ -206,31 +222,24 @@ int getAustralianTimezone(int city, int currentDay, int currentMonth, int curren
     return timezone;
 }
 
-int getNewZealandTimezone(int currentDay, int currentMonth, int currentHour)
+int getNewZealandTime(int day, int month, int hour)
 {
-    if (isDaylightSavings(23, 9, 1400, currentHour, currentDay, currentMonth, 1, 4, 1400)) {
-        return TIMEZONE_NZDT;
+    int timeZone;
+    if (dateChecker(1,4,1400, day, month, hour) && 
+        dateChecker(day, month, hour, 23,9,1400)) {
+            timeZone = TIMEZONE_NZST;         
+    } else {
+        timeZone = TIMEZONE_NZDT;
     }
 
-    return TIMEZONE_NZST;
+    return timeZone;
 }
 
-// Converts the time to local time
-// [DO NOT CHANGE THIS PROTOTYPE!]
-int getLocalTime(int city, int day, int month, int timeUTC)
-{
 
-    // REPLACE THIS WITH YOUR OWN CODE
-    int localTime = timeUTC;
-    int timeZone;
-
-    if (city >= 0 && city <= 10) {
-        timeZone = getAustralianTimezone(city, day, month, timeUTC);
-    } else {
-        timeZone = getNewZealandTimezone(day, month, timeUTC);
-    }
-    
-    //Combine utc, and timezone and then separate into hours and minutes two i.e 2359 becomes 23 and 59. 
+//Combines timeUTC, and timeZone, and reformats them into the correct time
+int formatTime(int timeUTC, int timeZone) {
+    //Combine utc, and timezone and then separate into hours
+    // and minutes i.e 2359 becomes 23 and 59. 
     int timeInHours = ((timeUTC / 100) + (timeZone / 100)) * 100; 
     int timeInMinutes = (timeUTC % 100) + (timeZone % 100);    
 
@@ -239,12 +248,27 @@ int getLocalTime(int city, int day, int month, int timeUTC)
         timeInHours = timeInHours - 2400;
     }
 
-    localTime = timeInHours + timeInMinutes;
+    int localTime = timeInHours + timeInMinutes;
     
     if (timeInMinutes >= 60) {
         localTime = localTime + 100 + -60;
     } 
-    // INSERT YOUR OWN CODE HERE
+
+    return localTime;
+}
+
+// Converts the time to local time
+// [DO NOT CHANGE THIS PROTOTYPE!]
+int getLocalTime(int city, int day, int month, int timeUTC)
+{
+    int timeZone;
+    if (city >= 0 && city <= 10) {
+        timeZone = getAusTime(city, day, month, timeUTC);
+    } else {
+        timeZone = getNewZealandTime(day, month, timeUTC);
+    }
+    
+    int localTime = formatTime(timeUTC, timeZone);
 
     return localTime;
 }
