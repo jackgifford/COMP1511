@@ -7,6 +7,7 @@
 #include <stdlib.h>
 
 #define WORLD_SIZE  80
+<<<<<<< HEAD
 #define GENERATIONS 31
 =======
 #define GENERATIONS 1000
