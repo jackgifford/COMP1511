@@ -8,6 +8,9 @@
 
 #define WORLD_SIZE  80
 #define GENERATIONS 31
+=======
+#define GENERATIONS 1000
+>>>>>>> a0188750d48dbb00b31a955e77c4ef5725375b57
 #define ALIVE   '*'
 #define DEAD    ' '
 
@@ -81,8 +84,46 @@ void display (int num, char *generation) {
 void nextGeneration (char curr[WORLD_SIZE], char next[WORLD_SIZE]) {
     int cell = 0;
     while (cell < WORLD_SIZE) {
+<<<<<<< HEAD
         // IMPLEMENT THE RULES HERE
         next[cell] = curr[cell];
         cell++;
     }
 }
+=======
+        char leftCell; 
+        if (cell -1 >= 0) {
+            leftCell = cell -1;
+        } else {
+            leftCell = 80;
+        }
+
+        char rightCell;
+        if (cell + 1 < WORLD_SIZE) {
+            rightCell = cell + 1;
+        } else {
+            rightCell = 0;
+        }
+
+        // IMPLEMENT THE RULES HERE
+        if (curr[cell] == DEAD) {
+            if (curr[leftCell] == ALIVE) {
+                next[cell] = ALIVE;
+            } else if (curr[rightCell] == ALIVE) {
+                next[cell] = ALIVE;
+            } else {
+                next[cell] = DEAD;
+            }
+        }
+
+        else { //ALIVE
+            if (curr[leftCell] == ALIVE && curr[rightCell] == ALIVE) {
+                next[cell] = DEAD;
+            } else {
+                next[cell] = ALIVE;
+            }
+        }
+        cell++;
+    }
+}
+>>>>>>> a0188750d48dbb00b31a955e77c4ef5725375b57
